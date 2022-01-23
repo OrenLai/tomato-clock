@@ -1,5 +1,5 @@
 from tkinter import *
-
+import math
 # ---------------------------- CONSTANTS ------------------------------- #
 PINK = "#e2979c"
 RED = "#e7305b"
@@ -15,12 +15,19 @@ LONG_BREAK_MIN = 20
 
 # ---------------------------- TIMER MECHANISM ------------------------------- # 
 def start_timer():
-    count_down(5)
+    count_down(12)
 
 
 # ---------------------------- COUNTDOWN MECHANISM ------------------------------- # 
 def count_down(count):
-    canvas.itemconfig(timer_text, text=count)
+    count_minutes = math.floor(count / 60)
+    count_seconds = count % 60
+    if count_seconds == 0 or count_seconds < 10:
+        count_seconds = f"0{count_seconds}"
+
+# change the data type of variable by changing the content in that variable is called dynamic typing
+    canvas.itemconfig(timer_text, text=f"{count_minutes}:{count_seconds}")
+
     if count > 0:
         window.after(1000, count_down, count - 1)
 
@@ -39,7 +46,7 @@ tomato_img = PhotoImage(file="tomato.png")
 # set the hightlightthickness to 0 to remove the white border around the picture
 canvas = Canvas(width=200, height=224, bg=YELLOW, highlightthickness=0)
 canvas.create_image(100, 112, image=tomato_img)
-timer_text = canvas.create_text(100, 130, text="00:00", fill="white", font=(FONT_NAME, 35, "bold"))
+timer_text = canvas.create_text(100, 130, text="25:00", fill="white", font=(FONT_NAME, 35, "bold"))
 canvas.grid(row=1, column=1)
 
 button_start = Button(text="Start", command=start_timer)
