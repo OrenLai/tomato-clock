@@ -1,35 +1,55 @@
 from tkinter import *
 import math
+
 # ---------------------------- CONSTANTS ------------------------------- #
 PINK = "#e2979c"
 RED = "#e7305b"
 GREEN = "#9bdeac"
 YELLOW = "#f7f5dd"
 FONT_NAME = "Courier"
-WORK_MIN = 25
+WORK_MIN = 1
 SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 20
+reps = 0
 
 
 # ---------------------------- TIMER RESET ------------------------------- #
 
 # ---------------------------- TIMER MECHANISM ------------------------------- # 
 def start_timer():
-    count_down(12)
+    global reps
+
+    work_seconds = WORK_MIN * 60
+    short_break_seconds = SHORT_BREAK_MIN * 60
+    long_break_seconds = LONG_BREAK_MIN * 60
+    if reps < 8:
+        reps += 1
+
+    if reps % 2 == 1:  # 1 3 5 7
+        timer_label.config(text="Work", fg=GREEN)
+        count_down(work_seconds)
+    elif reps == 8:
+        timer_label.config(text="Break", fg=RED)
+        count_down(long_break_seconds)
+    else:  # 2 4 6
+        timer_label.config(text="Break", fg=PINK)
+        count_down(short_break_seconds)
 
 
-# ---------------------------- COUNTDOWN MECHANISM ------------------------------- # 
+# ---------------------------- COUNTDOWN MECHANISM ------------------------------- #
 def count_down(count):
     count_minutes = math.floor(count / 60)
     count_seconds = count % 60
     if count_seconds == 0 or count_seconds < 10:
         count_seconds = f"0{count_seconds}"
 
-# change the data type of variable by changing the content in that variable is called dynamic typing
+    # change the data type of variable by changing the content in that variable is called dynamic typing
     canvas.itemconfig(timer_text, text=f"{count_minutes}:{count_seconds}")
 
     if count > 0:
         window.after(1000, count_down, count - 1)
+    else: # if the count goes 0 , start another round of timer
+        start_timer()
 
 
 # ---------------------------- UI SETUP ------------------------------- #
