@@ -7,32 +7,44 @@ RED = "#e7305b"
 GREEN = "#9bdeac"
 YELLOW = "#f7f5dd"
 FONT_NAME = "Courier"
-WORK_MIN = 1
+WORK_MIN = 25
 SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 20
 reps = 0
+timer = None
 
 
 # ---------------------------- TIMER RESET ------------------------------- #
+def reset_timer():
+    # stop the timer , reset the  timer text
+    window.after_cancel(timer)
+    canvas.itemconfig(timer_text, text="00:00")
+    # reset check mark
+    check_mark_label.config(text="")
+    # change the timer label
+    title_label.config(text="Timer", fg=GREEN)
+    global reps
+    reps = 0
 
-# ---------------------------- TIMER MECHANISM ------------------------------- # 
+
+# ---------------------------- TIMER MECHANISM ------------------------------- #
 def start_timer():
     global reps
 
     work_seconds = WORK_MIN * 60
     short_break_seconds = SHORT_BREAK_MIN * 60
     long_break_seconds = LONG_BREAK_MIN * 60
-    if reps < 8:
-        reps += 1
+    reps += 1
+    # expected behavior work(1) short_break(2) work(3) short_break work short_break work long_break
 
-    if reps % 2 == 1:  # 1 3 5 7
-        timer_label.config(text="Work", fg=GREEN)
-        count_down(work_seconds)
-    elif reps == 8:
-        timer_label.config(text="Break", fg=RED)
+    if reps == 8:
+        title_label.config(text="Break", fg=RED)
         count_down(long_break_seconds)
+    elif reps % 2 == 1:  # round 1 3 5 7
+        title_label.config(text="Work", fg=GREEN)
+        count_down(work_seconds)
     else:  # 2 4 6
-        timer_label.config(text="Break", fg=PINK)
+        title_label.config(text="Break", fg=PINK)
         count_down(short_break_seconds)
 
 
@@ -47,9 +59,16 @@ def count_down(count):
     canvas.itemconfig(timer_text, text=f"{count_minutes}:{count_seconds}")
 
     if count > 0:
-        window.after(1000, count_down, count - 1)
-    else: # if the count goes 0 , start another round of timer
+        global timer  # assign it to a variable so that we can stop it later with window.after_cancel method
+        timer = window.after(1000, count_down, count - 1)
+    else:  # if the count goes 0 , start another round of timer
         start_timer()
+        #  update the check marks
+        check_marks = ""
+        work_sessions = math.floor(reps / 2)
+        for _ in range(work_sessions):
+            check_marks += "✔"
+        check_mark_label.config(text=check_marks)
 
 
 # ---------------------------- UI SETUP ------------------------------- #
@@ -58,8 +77,8 @@ window.title("pomodoro")
 # add padding to the image to place it in the middle
 window.config(padx=100, pady=50, bg=YELLOW)
 
-timer_label = Label(text="Timer", font=(FONT_NAME, 36, "bold"), fg=GREEN, bg=YELLOW)
-timer_label.grid(row=0, column=1)
+title_label = Label(text="Timer", font=(FONT_NAME, 36, "bold"), fg=GREEN, bg=YELLOW)
+title_label.grid(row=0, column=1)
 
 # use PhotoImage class to create the pic object for canvas to use
 tomato_img = PhotoImage(file="tomato.png")
@@ -72,10 +91,10 @@ canvas.grid(row=1, column=1)
 button_start = Button(text="Start", command=start_timer)
 button_start.grid(row=2, column=0)
 
-button_reset = Button(text="Reset")
+button_reset = Button(text="Reset", command=reset_timer)
 button_reset.grid(row=2, column=2)
-check_mark = "✔"
-check_mark_label = Label(text=f"{check_mark}", fg=GREEN, bg=YELLOW)
+
+check_mark_label = Label(fg=GREEN, bg=YELLOW)
 check_mark_label.grid(row=3, column=1)
 
 window.mainloop()
